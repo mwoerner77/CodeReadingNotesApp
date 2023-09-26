@@ -1,19 +1,15 @@
 ﻿namespace NotesApp
 {
-    using Microsoft.Extensions.Caching.Memory;
     using NotesApp.Models;
     using System.Text.Json;
 
     public class NotesLibrary
     {
-        private readonly IMemoryCache recentNotesCache;
         private List<Note?>? notes = new List<Note?>();
         private static NotesLibrary notesLibraryInstance = new NotesLibrary();
 
         private NotesLibrary() 
         {
-            MemoryCacheOptions cacheOptions = new MemoryCacheOptions();
-            this.recentNotesCache = new MemoryCache(cacheOptions);
         }
 
         public static NotesLibrary GetNotesLibraryInstance()
@@ -51,7 +47,6 @@
 
             if (noteToAdd != null && this.notes != null) 
             {
-                this.recentNotesCache.Set(noteToAdd.Title, noteToAdd);
                 this.notes.Add(noteToAdd);
                 this.WriteAllNotes();
                 return statusCode;
@@ -76,12 +71,6 @@
 
         public bool TryGetNote(string? noteTitle, out Note? note)
         {
-            if (this.recentNotesCache.TryGetValue(noteTitle, out Note? n))
-            {
-                note = n;
-                return true;
-            }
-
             this.FetchAllNotes();
             if (this.notes != null) 
             {
